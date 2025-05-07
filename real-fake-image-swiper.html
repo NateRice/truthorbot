@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real or Fake - Image Verification Swiper</title>
+  <style>
+    :root {
+      --primary: #6366F1;
+      --primary-dark: #4F46E5;
+      --green: #22C55E;
+      --red: #EF4444;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-100);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: white;
+      padding: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--gray-800);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-link:hover {
+      color: var(--primary);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 0.5rem;
+    }
+
+    .instructions {
+      max-width: 600px;
+      text-align: center;
+      margin-bottom: 0.01rem;
+    }
+
+    .instructions h1 {
+      margin-bottom: 0.01rem;
+      color: var(--gray-900);
+      font-size: 1.25rem;
+    }
+
+    .instructions p {
+      color: var(--gray-800);
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .swipe-direction {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 0.25rem;
+    }
+
+    .direction {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .direction-real {
+      color: var(--green);
+    }
+
+    .direction-fake {
+      color: var(--red);
+    }
+
+    .card-container {
+      width: 100%;
+      max-width: 700px;
+      height: 800px;
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background-color: white;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      cursor: grab;
+    }
+
+    .card img {
+      width: 100%;
+      height: 90%;
+      object-fit: cover;
+    }
+
+    .card-info {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .image-details h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .image-details p {
+      color: var(--gray-800);
+      font-size: 0.9rem;
+    }
+
+    .swipe-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+      opacity: 0;
+      border-radius: 10px;
+      transition: opacity 0.2s ease;
+    }
+
+    .swipe-real {
+      background-color: rgba(34, 197, 94, 0.7);
+    }
+
+    .swipe-fake {
+      background-color: rgba(239, 68, 68, 0.7);
+    }
+
+    .button-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-real {
+      background-color: var(--green);
+      color: white;
+    }
+
+    .btn-fake {
+      background-color: var(--red);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-container {
+      width: 100%;
+      max-width: 500px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .stats-label {
+      color: var(--gray-800);
+    }
+
+    .stats-value {
+      font-weight: 600;
+    }
+
+    .results-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .correct {
+      color: var(--green);
+    }
+
+    .incorrect {
+      color: var(--red);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-text {
+      color: var(--gray-800);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-btn {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .modal-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .leaderboard-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .leaderboard-content {
+      max-width: 500px;
+    }
+
+    .name-input-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .name-input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      margin: 1.5rem 0;
+      background-color: var(--gray-100);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+    }
+
+    .leaderboard-rank {
+      width: 10%;
+      text-align: center;
+    }
+
+    .leaderboard-name {
+      width: 50%;
+      padding-left: 0.5rem;
+    }
+
+    .leaderboard-score {
+      width: 20%;
+      text-align: center;
+    }
+
+    .leaderboard-accuracy {
+      width: 20%;
+      text-align: center;
+    }
+
+    .leaderboard-entry {
+      display: flex;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--gray-300);
+    }
+
+    .leaderboard-entry:last-child {
+      border-bottom: none;
+    }
+
+    .leaderboard-entry.highlight {
+      background-color: rgba(99, 102, 241, 0.1);
+      font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .card-container {
+        height: 600px;
+      }
+
+      .instructions h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4c3.314 0 6 2.686 6 6v10c0 3.314-2.686 6-6 6H6c-3.314 0-6-2.686-6-6V8c0-3.314 2.686-6 6-6h4z"/><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><path d="M12 9v6"/><path d="M9 12h6"/></svg>
+      Real or Fake
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link">Home</a>
+      <a href="#" class="nav-link">About</a>
+      <a href="#" class="nav-link">Stats</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="instructions">
+      <h1>Is this image real or AI-generated?</h1>
+      <p>Swipe <span class="direction-real">LEFT for REAL</span> or <span class="direction-fake">RIGHT for FAKE</span> images</p>
+    </div>
+
+    <div class="swipe-direction">
+      <div class="direction direction-real">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        REAL
+      </div>
+      <div class="direction direction-fake">
+        FAKE
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="card-container">
+      <div class="card" id="current-card">
+        <div class="swipe-overlay swipe-real">REAL</div>
+        <div class="swipe-overlay swipe-fake">FAKE</div>
+        <img src="./placeholder_image.jpeg" alt="Image to verify">
+        <div class="card-info">
+          <div class="image-details">
+            <h3>Image #1</h3>
+            <p>Submitted 2 days ago</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button class="btn btn-real" id="btn-real">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        REAL
+      </button>
+      <button class="btn btn-fake" id="btn-fake">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+        FAKE
+      </button>
+    </div>
+
+    <div class="stats-container">
+      <div class="stats-header">
+        <h2>Your Stats</h2>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Images Reviewed</span>
+        <span class="stats-value" id="images-reviewed">0</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Correct Guesses</span>
+        <span class="stats-value" id="correct-guesses">0</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Accuracy</span>
+        <span class="stats-value" id="accuracy">0%</span>
+      </div>
+    </div>
+    <div class="leaderboard-modal" id="leaderboard-entry-modal">
+      <div class="modal-content">
+        <h2 class="modal-title">Great Job!</h2>
+        <p class="modal-text">You've reviewed all available images. Add your name to the leaderboard!</p>
+        <div class="name-input-container">
+          <input type="text" id="player-name" placeholder="Enter your name" class="name-input">
+          <button class="modal-btn" id="save-score-btn">Save Score</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="leaderboard-modal" id="leaderboard-modal">
+      <div class="modal-content leaderboard-content">
+        <h2 class="modal-title">Leaderboard</h2>
+        <div class="leaderboard-table">
+          <div class="leaderboard-header">
+            <div class="leaderboard-rank">#</div>
+            <div class="leaderboard-name">Name</div>
+            <div class="leaderboard-score">Score</div>
+            <div class="leaderboard-accuracy">Accuracy</div>
+          </div>
+          <div class="leaderboard-entries" id="leaderboard-entries">
+            <!-- Leaderboard entries will be inserted here -->
+          </div>
+        </div>
+        <button class="modal-btn" id="play-again-btn">Play Again</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="results-modal" id="results-modal">
+    <div class="modal-content">
+      <div class="result-icon correct" id="result-icon">✓</div>
+      <h2 class="modal-title" id="modal-title">Correct!</h2>
+      <p class="modal-text" id="modal-text">This image was indeed AI-generated. 78% of users agreed with you.</p>
+      <button class="modal-btn" id="next-image-btn">Next Image</button>
+    </div>
+  </div>
+
+  <script>
+    // Sample image data
+    const imageData = [
+      {
+        id: 1,
+        url: "https://banksy.co.uk/assets/images/outdoorimg/gabs.jpg",
+        title: "Image #1",
+        submittedAgo: "2 days ago",
+        isReal: true,
+        usersVotedReal: 22,
+        usersVotedFake: 78
+      },
+      {
+        id: 2,
+        url: "./bot_img/streetHydrant.png",
+        title: "Image #2",
+        submittedAgo: "5 days ago",
+        isReal: false,
+        usersVotedReal: 65,
+        usersVotedFake: 35
+      },
+      {
+        id: 3,
+        url: "./bot_img/banksy.png",
+        title: "Image #3",
+        submittedAgo: "1 day ago",
+        isReal: false,
+        usersVotedReal: 18,
+        usersVotedFake: 82
+      },
+      {
+        id: 4,
+        url: "./truth_img/acropolis.jpg",
+        title: "Image #4",
+        submittedAgo: "3 days ago",
+        isReal: true,
+        usersVotedReal: 71,
+        usersVotedFake: 29
+      },
+      {
+        id: 5,
+        url: "./bot_img/travelWfriends.png",
+        title: "Image #5",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 45,
+        usersVotedFake: 55
+      },
+      {
+        id: 6,
+        url: "https://cdn.britannica.com/65/227665-050-D74A477E/American-actor-Leonardo-DiCaprio-2016.jpg",
+        title: "Image #6",
+        submittedAgo: "1 week ago",
+        isReal: true,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 7,
+        url: "./bot_img/leonardoDiCaprio.png",
+        title: "Image #7",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 8,
+        url: "./truth_img/veniceWaterTaxi.jpg",
+        title: "Image #8",
+        submittedAgo: "1 week ago",
+        isReal: true,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 9,
+        url: "./truth_img/maltaHarbor.jpg",
+        title: "Image #9",
+        submittedAgo: "1 week ago",
+        isReal: true,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 10,
+        url: "./bot_img/monet2.png",
+        title: "Image #10",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 11,
+        url: "./bot_img/poolTropics.png",
+        title: "Image #11",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 12,
+        url: "https://images.unsplash.com/photo-1572067783369-dd94ea690487?q=80&w=1965&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        title: "Image #12",
+        submittedAgo: "1 week ago",
+        isReal: true,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 13,
+        url: "./bot_img/poolHighQuality.png",
+        title: "Image #13",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 14,
+        url: "./bot_img/ocean.png",
+        title: "Image #14",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 15,
+        url: "https://images.unsplash.com/photo-1700739746391-26561c282181?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        title: "Image #15",
+        submittedAgo: "1 week ago",
+        isReal: true,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 16,
+        url: "./bot_img/girlHomeSelfie.png",
+        title: "Image #16",
+        submittedAgo: "1 week ago",
+        isReal: false,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+      {
+        id: 17,
+        url: "./truth_img/adrianaLima.jpg",
+        title: "Image #17",
+        submittedAgo: "1 week ago",
+        isReal: true,
+        usersVotedReal: 50,
+        usersVotedFake: 50
+      },
+    ];
+
+    // Variables
+    let currentImageIndex = 0;
+    let imagesReviewed = 0;
+    let correctGuesses = 0;
+    let startX = 0;
+    let currentX = 0;
+    const card = document.getElementById('current-card');
+    const realOverlay = card.querySelector('.swipe-real');
+    const fakeOverlay = card.querySelector('.swipe-fake');
+    const btnReal = document.getElementById('btn-real');
+    const btnFake = document.getElementById('btn-fake');
+    const imagesReviewedEl = document.getElementById('images-reviewed');
+    const correctGuessesEl = document.getElementById('correct-guesses');
+    const accuracyEl = document.getElementById('accuracy');
+    const resultsModal = document.getElementById('results-modal');
+    const resultIcon = document.getElementById('result-icon');
+    const modalTitle = document.getElementById('modal-title');
+    const modalText = document.getElementById('modal-text');
+    const nextImageBtn = document.getElementById('next-image-btn');
+
+    const leaderboardEntryModal = document.getElementById('leaderboard-entry-modal');
+    const leaderboardModal = document.getElementById('leaderboard-modal');
+    const playerNameInput = document.getElementById('player-name');
+    const saveScoreBtn = document.getElementById('save-score-btn');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const leaderboardEntries = document.getElementById('leaderboard-entries');
+
+    // Initialize leaderboard from localStorage or create empty one
+    let leaderboard = JSON.parse(localStorage.getItem('realFakeLeaderboard')) || [];
+
+    // Initialize
+    loadImage(currentImageIndex);
+
+    // Event listeners
+    card.addEventListener('mousedown', startDrag);
+    card.addEventListener('touchstart', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+    btnReal.addEventListener('click', () => voteReal());
+    btnFake.addEventListener('click', () => voteFake());
+    nextImageBtn.addEventListener('click', () => {
+      resultsModal.style.display = 'none';
+      loadNextImage();
+    });
+    saveScoreBtn.addEventListener('click', saveScore);
+    playAgainBtn.addEventListener('click', resetGame);
+    playerNameInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        saveScore();
+      }
+    });
+
+    // Functions
+    function loadImage(index) {
+      if (index >= imageData.length) {
+        index = 0; // Loop back to the beginning
+      }
+      
+      const image = imageData[index];
+      const imgElement = card.querySelector('img');
+      const titleElement = card.querySelector('h3');
+      const submittedElement = card.querySelector('p');
+      
+      imgElement.src = image.url;
+      titleElement.textContent = image.title;
+      submittedElement.textContent = `Submitted ${image.submittedAgo}`;
+      
+      // Reset card position and appearance
+      card.style.transform = 'translateX(0)';
+      realOverlay.style.opacity = '0';
+      fakeOverlay.style.opacity = '0';
+    }
+
+    function startDrag(e) {
+      startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      card.style.transition = 'none';
+    }
+
+    function drag(e) {
+      if (startX === 0) return;
+      
+      currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      const diffX = currentX - startX;
+      
+      card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.03}deg)`;
+      
+      // Show overlays based on direction
+      if (diffX < 0) {
+        // Swiping left - REAL
+        realOverlay.style.opacity = Math.min(Math.abs(diffX) / 100, 0.8);
+        fakeOverlay.style.opacity = '0';
+      } else if (diffX > 0) {
+        // Swiping right - FAKE
+        fakeOverlay.style.opacity = Math.min(Math.abs(diffX) / 100, 0.8);
+        realOverlay.style.opacity = '0';
+      }
+    }
+
+    function endDrag(e) {
+      if (startX === 0) return;
+      
+      const diffX = currentX - startX;
+      card.style.transition = 'transform 0.3s ease';
+      
+      if (diffX < -100) {
+        // Swiped left - REAL
+        voteReal();
+      } else if (diffX > 100) {
+        // Swiped right - FAKE
+        voteFake();
+      } else {
+        // Not enough swipe - reset
+        card.style.transform = 'translateX(0) rotate(0deg)';
+        realOverlay.style.opacity = '0';
+        fakeOverlay.style.opacity = '0';
+      }
+      
+      startX = 0;
+      currentX = 0;
+    }
+
+    function voteReal() {
+      // Animate card off screen to the left
+      card.style.transform = 'translateX(-1000px) rotate(-30deg)';
+      realOverlay.style.opacity = '0.8';
+      
+      // Check if correct
+      setTimeout(() => {
+        checkAnswer(true);
+      }, 300);
+    }
+
+    function voteFake() {
+      // Animate card off screen to the right
+      card.style.transform = 'translateX(1000px) rotate(30deg)';
+      fakeOverlay.style.opacity = '0.8';
+      
+      // Check if correct
+      setTimeout(() => {
+        checkAnswer(false);
+      }, 300);
+    }
+
+    function checkAnswer(votedReal) {
+      const currentImage = imageData[currentImageIndex];
+      const isCorrect = votedReal === currentImage.isReal;
+      
+      imagesReviewed++;
+      if (isCorrect) correctGuesses++;
+      
+      updateStats();
+      showResultModal(votedReal, isCorrect, currentImage);
+    }
+
+    function updateStats() {
+      imagesReviewedEl.textContent = imagesReviewed;
+      correctGuessesEl.textContent = correctGuesses;
+      const accuracy = imagesReviewed > 0 ? Math.round((correctGuesses / imagesReviewed) * 100) : 0;
+      accuracyEl.textContent = `${accuracy}%`;
+    }
+
+    function showResultModal(votedReal, isCorrect, image) {
+      resultIcon.textContent = isCorrect ? "✓" : "✗";
+      resultIcon.className = isCorrect ? "result-icon correct" : "result-icon incorrect";
+      
+      modalTitle.textContent = isCorrect ? "Correct!" : "Incorrect!";
+      
+      const realPercentage = image.usersVotedReal;
+      const fakePercentage = image.usersVotedFake;
+      
+      if (votedReal) {
+        modalText.textContent = `This image was ${image.isReal ? 'indeed real' : 'actually AI-generated'}. ${realPercentage}% of users voted REAL and ${fakePercentage}% voted FAKE.`;
+      } else {
+        modalText.textContent = `This image was ${image.isReal ? 'actually real' : 'indeed AI-generated'}. ${realPercentage}% of users voted REAL and ${fakePercentage}% voted FAKE.`;
+      }
+      
+      resultsModal.style.display = 'flex';
+    }
+
+    function loadNextImage() {
+      currentImageIndex++;
+      if (currentImageIndex >= imageData.length) {
+        leaderboardEntryModal.style.display = 'flex';
+      } else {
+        loadImage(currentImageIndex);
+      }
+    }
+
+    function saveScore() {
+      const playerName = playerNameInput.value.trim();
+      if (!playerName) {
+        alert('Please enter your name');
+        return;
+      }
+       // Calculate score and accuracy
+      const accuracy = imagesReviewed > 0 ? Math.round((correctGuesses / imagesReviewed) * 100) : 0;
+      const score = correctGuesses * 100; // Simple scoring formula
+
+      // Create player entry
+      const playerEntry = {
+        name: playerName,
+        score: score,
+        accuracy: accuracy,
+        correctGuesses: correctGuesses,
+        imagesReviewed: imagesReviewed,
+        date: new Date().toISOString()
+      };
+
+      // Add to leaderboard and sort
+      leaderboard.push(playerEntry);
+      leaderboard.sort((a, b) => b.score - a.score);
+
+      // Only keep top 10
+      if (leaderboard.length > 10) {
+        leaderboard.length = 10;
+      }
+
+      // Save to localStorage
+      localStorage.setItem('realFakeLeaderboard', JSON.stringify(leaderboard));
+
+      // Hide entry modal and show leaderboard
+      leaderboardEntryModal.style.display = 'none';
+      showLeaderboard(playerEntry);
+    }
+
+    function showLeaderboard(currentPlayer = null) {
+      // Clear existing entries
+      leaderboardEntries.innerHTML = '';
+
+      // Add each entry to the leaderboard
+      leaderboard.forEach((player, index) => {
+        const entryElement = document.createElement('div');
+        entryElement.className = 'leaderboard-entry';
+        
+        // Highlight current player
+        if (currentPlayer && player.name === currentPlayer.name && 
+            player.score === currentPlayer.score && 
+            player.date === currentPlayer.date) {
+          entryElement.classList.add('highlight');
+        }
+        
+        entryElement.innerHTML = `
+          <div class="leaderboard-rank">${index + 1}</div>
+          <div class="leaderboard-name">${player.name}</div>
+          <div class="leaderboard-score">${player.score}</div>
+          <div class="leaderboard-accuracy">${player.accuracy}%</div>
+        `;
+        
+        leaderboardEntries.appendChild(entryElement);
+      });
+
+      // Show the leaderboard modal
+      leaderboardModal.style.display = 'flex';
+    }
+
+    function resetGame() {
+      // Reset game state
+      currentImageIndex = 0;
+      imagesReviewed = 0;
+      correctGuesses = 0;
+      
+      // Update stats display
+      updateStats();
+      
+      // Hide leaderboard and load first image
+      leaderboardModal.style.display = 'none';
+      loadImage(currentImageIndex);
+    }
+  </script>
+</body>
+</html>
